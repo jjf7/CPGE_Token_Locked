@@ -30,22 +30,21 @@ const Formulary2 = () => {
       setLoading(true);
       setDisa(true);
 
-      const amount = await contractToken.balanceOf(account);
-
+      const amount = await contractToken.balanceOf(account); //wei 19 decimales
+      
       // approve bloquear el 80%
 
-      const tokensToApprove = (amount * PERCENT) / 100;
-
-      console.log(`tokensToApprove: ${tokensToApprove}`);
+      const tokenAmount = ethers.BigNumber.from(amount).mul(PERCENT/10).div(10);
 
       const txResponse3 = await contractToken.approve(
         ADDRESS_LOCKED_CONTRACT,
-        tokensToApprove.toString()
+        tokenAmount
       );
 
       await txResponse3.wait();
 
-      const amountInWei = (amount / 10).toString();
+      const amountInWei = ethers.BigNumber.from(amount).div(10);
+
 
       const txResponse2 = await contractLocked.lock(amountInWei);
       await txResponse2.wait();
@@ -53,13 +52,16 @@ const Formulary2 = () => {
       toast.success("Tokens bloqueados exitosamente!");
 
       const tokensBloqueados = await contractLocked.locks(account);
+    
+
       setTokensBloqueados(
-        ethers.utils.formatEther(tokensBloqueados.amount) / 10
+        ethers.utils.formatEther(tokensBloqueados.amount, { commify: true, pad: true, digits: 2 }) 
       );
 
       const balance = await contractToken.balanceOf(account);
+     
 
-      setBalance(ethers.utils.formatEther(balance) / 10);
+      setBalance(ethers.utils.formatEther(balance, { commify: true, pad: true, digits: 2 }) );
 
       setLoading(false);
       setDisa(false);

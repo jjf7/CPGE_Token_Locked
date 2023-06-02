@@ -35,12 +35,14 @@ const Formulary3 = () => {
       toast.success("Tokens desbloqueados exitosamente!");
 
       const tokensBloqueados = await contractLocked.locks(account);
+      
       setTokensBloqueados(
-        ethers.utils.formatEther(tokensBloqueados.amount) / 10
+        ethers.utils.formatEther(tokensBloqueados.amount, { commify: true, pad: true, digits: 2 }) 
       );
 
       const balance = await contractToken.balanceOf(account);
-      setBalance(ethers.utils.formatEther(balance) / 10);
+     
+      setBalance(ethers.utils.formatEther(balance, { commify: true, pad: true, digits: 2 }) );
 
       setLoading(false);
       setDisa(false);

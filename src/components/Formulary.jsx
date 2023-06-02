@@ -34,6 +34,8 @@ const Formulary = () => {
         return toast.info("Introduce un valor mayor a cero!");
       }
 
+      console.log(`amount : ${amount}`);
+
       setLoading(true);
 
       setDisa(true);
@@ -42,26 +44,19 @@ const Formulary = () => {
 
       const weiAmount = ethers.utils.parseUnits(convertAmountIntoBNB, "ether");
 
-      console.log(weiAmount.toString()); //  cantidad de BNB que desea enviar para la compra
-
       const overrides = { value: weiAmount };
 
       // Compra los tokens
       const txResponse = await contractLocked.buyTokens(overrides);
-
       await txResponse.wait();
 
-      // approve bloquear el 80%
+      // bloquear el 80% de todo mi balance
 
-      const tokensToApprove = ((amount * PERCENT) / 100) * 10;
-      console.log(tokensToApprove);
+      const amountBlock = await contractToken.balanceOf(account); //wei 19 decimales
 
-      const tokenAmount = ethers.utils.parseUnits(
-        tokensToApprove.toString(),
-        "ether"
-      ); // cantidad de tokens que desea comprar
-
-      console.log("tokenAmount :" + tokenAmount.toString());
+      const tokenAmount = ethers.BigNumber.from(amountBlock)
+        .mul(PERCENT / 10)
+        .div(10);
 
       const txResponse3 = await contractToken.approve(
         ADDRESS_LOCKED_CONTRACT,
@@ -70,26 +65,34 @@ const Formulary = () => {
 
       await txResponse3.wait();
 
-      const amountInWei = ethers.utils.parseUnits(amount, "ether");
-
-      console.log("amountInWei :" + amountInWei.toString());
+      const amountInWei = ethers.BigNumber.from(amountBlock).div(10);
 
       const txResponse2 = await contractLocked.lock(amountInWei);
       await txResponse2.wait();
 
-      console.log("Tokens comprados exitosamente");
-      toast.success("Compra exitosa!");
-
-      resetForm();
+      toast.success("Tokens bloqueados exitosamente!");
 
       const tokensBloqueados = await contractLocked.locks(account);
+
       setTokensBloqueados(
-        ethers.utils.formatEther(tokensBloqueados.amount) / 10
+        ethers.utils.formatEther(tokensBloqueados.amount, {
+          commify: true,
+          pad: true,
+          digits: 2,
+        })
       );
 
       const balance = await contractToken.balanceOf(account);
-      setBalance(ethers.utils.formatEther(balance) / 10);
 
+      setBalance(
+        ethers.utils.formatEther(balance, {
+          commify: true,
+          pad: true,
+          digits: 2,
+        })
+      );
+
+      resetForm();
       setLoading(false);
       setDisa(false);
     } catch (error) {

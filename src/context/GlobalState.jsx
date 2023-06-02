@@ -46,8 +46,7 @@ export const GlobalProvider = ({ children }) => {
       setContractToken(contractToken);
 
       const balance = await contractToken.balanceOf(address);
-
-      setBalance(ethers.utils.formatEther(balance) / 10);
+      setBalance(ethers.utils.formatEther(balance, { commify: true, pad: true, digits: 2 }) );
 
       const contractLocked = new ethers.Contract(
         ADDRESS_LOCKED_CONTRACT,
@@ -59,7 +58,7 @@ export const GlobalProvider = ({ children }) => {
 
       const tokensBloqueados = await contractLocked.locks(address);
       setTokensBloqueados(
-        ethers.utils.formatEther(tokensBloqueados.amount) / 10
+        ethers.utils.formatEther(tokensBloqueados.amount, { commify: true, pad: true, digits: 2 }) 
       );
     } else {
       toast.info("Por favor instale metamask");
